@@ -57,6 +57,18 @@ void Move(char power, bool cw = true) {
   }
 }
 
+void findMiddleOnReset() {
+  while(!absolute_sw) {
+    Move(255, true);
+    count = 0;
+  }
+  while(count < 539 && count > 545) {
+    Move(255, true);
+  }
+  Stop();
+  count = 0;
+}
+
 void findAbsolutePosition() {
   if (count > -10 && count < 10) {
     Stop();
@@ -86,6 +98,8 @@ void setup() {
   sei();
 
   Idle();
+
+  findMiddleOnReset();
 }
 
 int dir = ATUA_CCW;
