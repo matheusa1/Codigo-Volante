@@ -57,13 +57,22 @@ void Move(char power, bool cw = true) {
   }
 }
 
+int offset = 800;
+int janela = 5;
+
 void findMiddleOnReset() {
   while(!absolute_sw) {
-    Move(255, true);
+    Move(167, true);
+  }
+  while(absolute_sw) {
+    Move(167, true);
+  }
+  while(!absolute_sw) {
+    Move(167, true);
   }
   count = 0;
-  while(count < 539 && count > 545) {
-    Move(255, true);
+  while(!(count > offset && count < offset + janela)) {
+    Move(165, true);
   }
   Stop();
   count = 0;
@@ -96,9 +105,9 @@ void setup() {
 
   initPWM();
   sei();
-
-  Idle();
-
+  
+  //Idle();
+  
   findMiddleOnReset();
 }
 
@@ -110,7 +119,7 @@ void loop() {
     Serial.print(count);
     Serial.print(", ");
     Serial.println(absolute_sw==true?'1':'0');
-  }
+  }  
 
   findAbsolutePosition(); 
 }
