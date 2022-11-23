@@ -57,7 +57,7 @@ void Move(char power, bool cw = true) {
   }
 }
 
-int offset = 800;
+int offset = 569;
 int janela = 5;
 
 void findMiddleOnReset() {
