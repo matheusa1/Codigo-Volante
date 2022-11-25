@@ -57,29 +57,22 @@ void Move(char power, bool cw = true) {
     setPWM(power);
   }
 }
- 
-int offset = 569;
+
 int janela = 5;
+
+int flag = 1;
  
 void findMiddleOnReset() {
   while(!absolute_sw) {
-    Move(180, true);
+    Move(170, true);
   }
   while(absolute_sw) {
-    Move(180, true);
-  }
-  while(!absolute_sw) {
-    Move(180, true);
-  }
-  while(absolute_sw) {
-    Move(180, true);
-  }
-  while(!absolute_sw) {
-    Move(180, true);
+    Move(170, true);
   }
   int lastCount = count;
+  // _delay_ms(1);
   int value;
-  EEPROM.put(0, (3600 - lastCount));
+  if(flag != 1) EEPROM.put(0, (3600 - lastCount));
   EEPROM.get(0, value);
   count = 0;
   while(!(count > value && count < value  + janela)) {
@@ -88,18 +81,21 @@ void findMiddleOnReset() {
   Stop();
   count = 0;
 }
+
+int janela2 = 5;
  
 void findAbsolutePosition() {
-  if (count > -10 && count < 10) {
+  if (count > (0 - janela2) && count < janela2) {
     Stop();
   } else {
     count >= 0 ? direction = false : direction = true;
     Move(165, direction);
   }
 }
-  unsigned long tempo = millis();
 
+unsigned long tempo = millis();
  
+
 void setup() {
   Serial.begin(115200);
   r.begin(true);
@@ -116,7 +112,7 @@ void setup() {
   PORTB &= ~(1<<ATUA_CW);
   PORTB &= ~(1<<ATUA_CCW);
  
-  EEPROM.put(0, 569);
+  // EEPROM.put(0, 569);
 
   initPWM();
   sei();
@@ -124,48 +120,42 @@ void setup() {
 
   findMiddleOnReset();
 
-  while(millis() - tempo < 4000) findAbsolutePosition();
   tempo = millis();
+  while(millis() - tempo < 2000) findAbsolutePosition();
+  flag = 0;
 
- 
   //Idle();
  }
  
 int dir = ATUA_CCW;
- 
-int flag = 1;
 
 unsigned long btn_clicked = millis();
 char laststate = 0;
 
 void loop() {
+  Stop();
   // debug only info
   if (millis()%200==0) {
     Serial.print(count);
     Serial.print(", ");
     Serial.println(absolute_sw==true?'1':'0');
   }
-
-  // while(flag == 1) {
-    char leitura = PINB & (1<<GP_BUTTON);
-    if(leitura != laststate && (millis()- btn_clicked)>10){
-      if(leitura == 0) {
-        count = 0;
-        EEPROM.put(0, count);
-        findMiddleOnReset();
-        flag = 0;
-      }
-      btn_clicked = millis();
-      laststate = leitura;
+  
+  char leitura = PINB & (1<<GP_BUTTON);
+  if(leitura != laststate && (millis()- btn_clicked)>10){
+    if(leitura == 0) {
+      count = 0;
+      EEPROM.put(0, count);
+      findMiddleOnReset();
+      tempo = millis();
+      while(millis() - tempo < 2000) findAbsolutePosition();
     }
 
-    // findAbsolutePosition();
-
-    while(millis() - tempo < 4000) findAbsolutePosition();
-    tempo = millis();
-  // }
- 
-}
+    btn_clicked = millis();
+    laststate = leitura;
+  }
+  
+ }
  
 ISR(PCINT2_vect) {
   unsigned char result = r.process();
